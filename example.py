@@ -1,9 +1,4 @@
 import logging
-import tempfile
-import unittest.mock as mock
-
-with mock.patch("multiprocessing.Lock", return_value=object()):
-    import undetected_chromedriver as uc
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -17,23 +12,8 @@ logger.setLevel(logging.DEBUG)
 
 TIMEOUT: int = 1000000
 
-tempdir = tempfile.gettempdir()
-options: uc.ChromeOptions = uc.ChromeOptions()
-options.add_argument("--headless")
-options.add_argument("--disable-gpu")
-options.add_argument("--disable-dev-shm-usage")
-options.add_argument("--hide-scrollbars")
-options.add_argument("--single-process")
-options.add_argument("--ignore-certificate-errors")
-options.add_argument(f"--homedir={tempdir}")
-options.add_argument(f"--disk-cache-dir={tempdir}/cache-dir")
-options.add_argument(f"--data-path={tempdir}/data-path")
-options.add_experimental_option("prefs", {"download.default_directory": tempdir})
-logger.debug("Opening driver")
-driver: uc.Chrome = uc.Chrome(options=options)
 
-
-def main(**kwargs):
+def main(driver, **kwargs) -> str:
     query: str = kwargs.pop("query")
 
     logger.debug("Navigating to Google")

@@ -1,8 +1,9 @@
 import csv
 import json
 import random
-import boto3
 from concurrent.futures import ThreadPoolExecutor
+
+import boto3
 
 NUM_PROXIES = 10
 
