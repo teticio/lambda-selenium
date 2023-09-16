@@ -18,7 +18,7 @@ def lambda_handler(event, context):  # pylint: disable=unused-argument
     if not hasattr(module, "main"):
         return {
             "statusCode": 400,
-            "body": "Missing main function.",
+            "body": "Missing main function",
         }
 
     return {"statusCode": 200, "body": str(module.main(**event))}
