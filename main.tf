@@ -35,7 +35,7 @@ module "lambda_selenium" {
   image_uri              = module.docker_image.image_uri
   package_type           = "Image"
   architectures          = ["x86_64"]
-  timeout                = 180
+  timeout                = 30
   memory_size            = 4096
   ephemeral_storage_size = 4096
   hash_extra             = count.index
