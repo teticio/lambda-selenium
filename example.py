@@ -44,4 +44,5 @@ def main(driver, **kwargs) -> str:
 
 
 if __name__ == "__main__":
-    print(main(query="dog"))
+    from lambda_function import get_driver
+    print(main(get_driver(), query="dog"))
