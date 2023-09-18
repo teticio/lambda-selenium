@@ -42,7 +42,7 @@ if __name__ == "__main__":
     random.shuffle(dogs)
 
     if len(dogs) < NUM_PROXIES:
-        chunks = [dogs]
+        chunks = [[dog] for dog in dogs]
     else:
         chunk_size = max(len(dogs) // NUM_PROXIES, 1)
         chunks = [dogs[i : i + chunk_size] for i in range(0, len(dogs), chunk_size)]
