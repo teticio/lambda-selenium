@@ -9,9 +9,10 @@ with mock.patch("multiprocessing.Lock", return_value=object()):
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
+tempdir = gettempdir()
+
 
 def get_driver() -> uc.Chrome:
-    tempdir = gettempdir()
     options: uc.ChromeOptions = uc.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--disable-gpu")
@@ -47,6 +48,8 @@ def lambda_handler(event, context):  # pylint: disable=unused-argument
                 "body": "Missing main function",
             }
 
-        result = module.main(get_driver(), **event)
+    driver = get_driver()
+    result = module.main(driver, **event)
+    driver.close()
 
     return {"statusCode": 200, "body": str(result)}
