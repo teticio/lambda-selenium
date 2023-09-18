@@ -1,4 +1,5 @@
 import logging
+from urllib.parse import quote
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -17,7 +18,7 @@ def main(driver, **kwargs) -> str:
     query: str = kwargs.pop("query")
 
     logger.debug("Navigating to Google")
-    driver.get("https://www.google.com/?q=" + query)
+    driver.get("https://www.google.com/?q=" + quote(query))
 
     logger.debug("Waiting for Accept All button")
     WebDriverWait(driver, TIMEOUT).until(
