@@ -41,10 +41,13 @@ if __name__ == "__main__":
         dogs = [row[0] for row in csv_reader]
     random.shuffle(dogs)
 
-    chunk_size = max(len(dogs) // NUM_PROXIES, 1)
-    chunks = [dogs[i : i + chunk_size] for i in range(0, len(dogs), chunk_size)]
-    if len(dogs) % NUM_PROXIES:
-        chunks[-1].extend(dogs[-(len(dogs) % NUM_PROXIES) :])
+    if len(dogs) < NUM_PROXIES:
+        chunks = [dogs]
+    else:
+        chunk_size = max(len(dogs) // NUM_PROXIES, 1)
+        chunks = [dogs[i : i + chunk_size] for i in range(0, len(dogs), chunk_size)]
+        if len(dogs) % NUM_PROXIES:
+            chunks[-1].extend(dogs[-(len(dogs) % NUM_PROXIES) :])
 
     for chunk in chunks:
         with ThreadPoolExecutor() as executor:
