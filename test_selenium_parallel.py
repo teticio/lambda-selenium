@@ -1,11 +1,19 @@
+import concurrent.futures
 import csv
 import json
-import random
-from concurrent.futures import ThreadPoolExecutor
+import logging
 
 import boto3
+from botocore.client import Config
+from tqdm import tqdm
+
+handler = logging.StreamHandler()
+logger = logging.getLogger()
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 NUM_PROXIES = 10
+MAX_REQUESTS_PER_PROXY = 20
 
 
 def get_lambda_function():
@@ -15,47 +23,56 @@ def get_lambda_function():
         round_robin = (round_robin + 1) % NUM_PROXIES
 
 
-def invoke_lambda(dog, function_name, client, payload_src):
-    response = json.loads(
-        client.invoke(
-            FunctionName=function_name,
-            InvocationType="RequestResponse",
-            Payload=json.dumps({"src": payload_src, "query": dog}),
-        )["Payload"].read()
-    )
+def process_chunk(chunk, function_name, src):
+    config = Config(max_pool_connections=NUM_PROXIES)
+    client = boto3.client("lambda", config=config)
 
-    if "body" not in response:
-        raise Exception(response)
+    results = list()
+    for item in tqdm(chunk):
+        try:
+            response = json.loads(
+                client.invoke(
+                    FunctionName=function_name,
+                    InvocationType="RequestResponse",
+                    Payload=json.dumps({"src": src, "query": item}),
+                )["Payload"].read()
+            )
+            if "body" not in response:
+                raise Exception(response)
+            results.append(response["body"])
 
-    print(dog)
-    print(response["body"])
-    print()
+        except Exception as e:
+            logger.error(e)
+            results.append(e)
+
+    return results
 
 
 if __name__ == "__main__":
-    lambda_client = boto3.client("lambda")
+    client = boto3.client("lambda")
     lambda_function = get_lambda_function()
 
     with open("dogs.txt", mode="r") as file:
         csv_reader = csv.reader(file)
-        dogs = [row[0] for row in csv_reader]
-    random.shuffle(dogs)
+        items = [row[0] for row in csv_reader]
 
-    if len(dogs) < NUM_PROXIES:
-        chunks = [[dog] for dog in dogs]
-    else:
-        chunk_size = max(len(dogs) // NUM_PROXIES, 1)
-        chunks = [dogs[i : i + chunk_size] for i in range(0, len(dogs), chunk_size)]
-        if len(dogs) % NUM_PROXIES:
-            chunks[-1].extend(dogs[-(len(dogs) % NUM_PROXIES) :])
+    chunk_size = min(max(1, len(items) // (NUM_PROXIES - 1)), MAX_REQUESTS_PER_PROXY)
+    chunks = [items[i : i + chunk_size] for i in range(0, len(items), chunk_size)]
 
-    for chunk in chunks:
-        with ThreadPoolExecutor() as executor:
-            function_name = next(lambda_function)
-            payload_src = open("example.py").read()
-            executor.map(
-                lambda dog: invoke_lambda(
-                    dog, function_name, lambda_client, payload_src
-                ),
-                chunk,
-            )
+    src = open("example.py").read()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=NUM_PROXIES) as executor:
+        futures = {
+            executor.submit(
+                process_chunk,
+                chunk=chunk,
+                function_name=next(lambda_function),
+                src=src,
+            ): chunk
+            for chunk in chunks
+        }
+
+        for future in concurrent.futures.as_completed(futures):
+            for query, result in zip(futures[future], future.result()):
+                logger.info(query)
+                logger.info(result)
+                logger.info("=" * 80)
