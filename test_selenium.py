@@ -1,8 +1,14 @@
 import csv
 import json
+import logging
 import random
 
 import boto3
+
+handler = logging.StreamHandler()
+logger = logging.getLogger()
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 NUM_PROXIES = 10
 
@@ -20,21 +26,21 @@ if __name__ == "__main__":
 
     with open("dogs.txt", mode="r") as file:
         csv_reader = csv.reader(file)
-        dogs = [row[0] for row in csv_reader]
+        items = [row[0] for row in csv_reader]
 
     while True:
-        dog = random.choice(dogs)
+        item = random.choice(items)
         response = json.loads(
             lambda_client.invoke(
                 FunctionName=next(lambda_function),
                 InvocationType="RequestResponse",
-                Payload=json.dumps({"src": open("example.py").read(), "query": dog}),
+                Payload=json.dumps({"src": open("example.py").read(), "query": item}),
             )["Payload"].read()
         )
 
         if "body" not in response:
             raise Exception(response)
 
-        print(dog)
-        print(response["body"])
-        print()
+        logger.info(item)
+        logger.info(response.get("body", response))
+        logger.info("=" * 80)
