@@ -24,7 +24,7 @@ You can specify an `AWS_PROFILE` and `AWS_REGION` with
 terraform apply -auto-approve -var 'region=AWS_REGION' -var 'profile=AWS_PROFILE'
 ```
 
-An example of how to use this from Python is provided in `test_selenium.py`. It runs the script in `example.py` to search for descriptions of dog breeds in Google. Note that this is a heavy handed approach for this particular case as the same could be acheived with requests (see [lambda-scraper](https://github.com/teticio/lambda-scraper)).
+An example of how to use this from Python is provided in `test_selenium.py`. It runs the script in `example.py` to search for descriptions of dog breeds in Google.
 
 ```bash
 AWS_DEFAULT_REGION=AWS_REGION python test_selenium.py
