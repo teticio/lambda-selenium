@@ -1,5 +1,7 @@
 import importlib.util
 import logging
+import os
+import shutil
 import unittest.mock as mock
 from tempfile import NamedTemporaryFile, gettempdir
 
@@ -51,5 +53,8 @@ def lambda_handler(event, context):  # pylint: disable=unused-argument
     driver = get_driver()
     result = module.main(driver, **event)
     driver.close()
+
+    shutil.rmtree(tempdir, ignore_errors=True)
+    os.makedirs(tempdir, exist_ok=True)
 
     return {"statusCode": 200, "body": str(result)}

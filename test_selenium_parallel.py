@@ -13,7 +13,7 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 NUM_PROXIES = 10
-MAX_REQUESTS_PER_PROXY = 20
+MAX_REQUESTS_PER_PROXY = 50
 
 
 def get_lambda_function():
@@ -28,7 +28,7 @@ def process_chunk(chunk, function_name, src):
     client = boto3.client("lambda", config=config)
 
     results = list()
-    for item in tqdm(chunk):
+    for item in tqdm(chunk, desc=function_name):
         try:
             response = json.loads(
                 client.invoke(
