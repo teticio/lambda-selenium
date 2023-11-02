@@ -45,7 +45,7 @@ module "docker_image" {
   source          = "terraform-aws-modules/lambda/aws//modules/docker-build"
   create_ecr_repo = true
   ecr_repo        = "lambda-selenium"
-  source_path     = "${path.module}/src"
+  source_path     = "${path.module}"
   platform        = "linux/amd64"
 
   image_tag = sha1(join("", [
