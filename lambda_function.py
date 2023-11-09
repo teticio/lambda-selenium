@@ -2,6 +2,7 @@ import importlib.util
 import logging
 import os
 import shutil
+import subprocess
 import unittest.mock as mock
 from tempfile import NamedTemporaryFile, gettempdir
 
@@ -27,7 +28,15 @@ def get_driver() -> uc.Chrome:
     options.add_argument(f"--data-path={tempdir}/data-path")
     options.add_experimental_option("prefs", {"download.default_directory": tempdir})
     logger.debug("Opening driver")
-    return uc.Chrome(options=options)
+    result = subprocess.run(
+        ["google-chrome", "--version"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    logger.debug(f"Chrome version: {result.stdout}")
+    chrome_version = int(result.stdout.split(" ")[-2].split(".")[0])
+    return uc.Chrome(options=options, version_main=chrome_version)
 
 
 def lambda_handler(event, context):  # pylint: disable=unused-argument
