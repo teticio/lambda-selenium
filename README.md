@@ -30,8 +30,11 @@ An example of how to use this from Python is provided in `test_selenium.py`. It 
 AWS_DEFAULT_REGION=AWS_REGION python test_selenium.py
 ```
 
-There is also an example of running the Lambda functions in parallel, which greatly speeds up the process.
+There are also examples of running the Lambda functions in parallel and asynchronously, which greatly speed up the process.
 
 ```bash
+# Multi-processing (uses multiple CPU cores)
 AWS_DEFAULT_REGION=AWS_REGION python test_selenium_parallel.py
+# Asynchronous
+AWS_DEFAULT_REGION=AWS_REGION python test_selenium_async.py
 ```

@@ -49,7 +49,6 @@ def process_chunk(chunk, function_name, src):
 
 
 if __name__ == "__main__":
-    client = boto3.client("lambda")
     lambda_function = get_lambda_function()
 
     with open("dogs.txt", mode="r") as file:
